@@ -1,0 +1,256 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import MaterialTable from "material-table";
+import { Button, createTheme, MuiThemeProvider } from "@material-ui/core";
+import NavBar from "./Navbar";
+import "./Diagnostics.css";
+const theme = createTheme({
+	overrides: {
+		MuiTableSortLabel: {
+			root: {
+				color: "#fff",
+				transition: "all 0.5s ease",
+				"&:hover": {
+					color: "#66b933",
+				},
+			},
+		},
+	},
+});
+function Diagnostics() {
+	const [state, setState] = useState([]);
+	const tableData = [];
+	const camera_name = "";
+	const rowTableData = [];
+	const myfunction = (rowData) => {
+		console.log("got the data", rowData);
+		rowData.camera_name = "harsh";
+		rowTableData.push(rowData.camera_name);
+	};
+	const fetchData = () => {
+		fetch("https://app-assertai.com/api/getCSVData/getData")
+			.then((res) => {
+				return res.json();
+			})
+			.then((data) => {
+				console.log(data);
+				setState(data);
+			});
+	};
+	useEffect(() => {
+		fetchData();
+	}, []);
+	state.map((item) => {
+		tableData.push(item);
+	});
+	return (
+		<div>
+			<NavBar />
+			<MuiThemeProvider theme={theme}>
+				<MaterialTable
+					title="Diagnostics Table"
+					columns={[
+						{
+							field: "Sr. No",
+							title: "Sr. No",
+						},
+						{
+							field: "DeviceId",
+							title: "DeviceId",
+						},
+						{
+							field: "Branch Name",
+							title: "Branch Name",
+						},
+						{
+							field: "GPU status",
+							title: "GPU status",
+						},
+						{
+							field: "Dashboard status",
+							title: "Dashboard status",
+						},
+						{
+							field: "DVR/cameras staus",
+							title: "DVR/cameras staus",
+						},
+						{
+							field: "Ageing",
+							title: "Ageing",
+						},
+						{
+							field: "Ticket Issues",
+							title: "Ticket Issues",
+						},
+						// {
+						// 	field: "Ticket Issue Date",
+						// 	title: "Ticket Issue Date",
+						// },
+						{
+							field: "TargetDate",
+							title: "Target Date",
+						},
+						{
+							field: "Heart Beat",
+							title: "Heart Beat",
+						},
+						{
+							field: "Remarks",
+							title: "Remarks",
+						},
+					]}
+					data={tableData}
+					options={{
+						actionsColumnIndex: -1,
+						addRowPosition: "first",
+						headerStyle: {
+							backgroundColor: "rgb(40,40,40,0.8)",
+							color: "#FFF",
+						},
+
+						exportButton: true,
+						exportAllData: true,
+					}}
+					detailPanel={(rowData) => {
+						return (
+							<MuiThemeProvider theme={theme}>
+								{/* <MaterialTable
+									title="Sub Table"
+									options={{
+										search: false,
+										actionsColumnIndex: -1,
+										addRowPosition: "first",
+										headerStyle: {
+											backgroundColor: "rgb(40,40,40,0.8)",
+											color: "#FFF",
+										},
+									}}
+									columns={[
+										{
+											field: "Camera ID",
+											title: "Camera ID",
+										},
+										{
+											field: "CameraName",
+											title: "Camera Name",
+										},
+										{
+											field: "Status",
+											title: "Status",
+										},
+									]}
+									onRowClick={myfunction(rowData)}
+									data={rowData}
+								/> */}
+								<table>
+									<tr>
+										<th>Camera ID</th>
+										<th>Camera Name</th>
+										<th>Status</th>
+									</tr>
+									<tr>
+										<td>1</td>
+										<td>Cam 1</td>
+										<td>Online</td>
+									</tr>
+									<tr>
+										<td>2</td>
+										<td>Cam 2</td>
+										<td>Online</td>
+									</tr>
+								</table>
+							</MuiThemeProvider>
+						);
+					}}
+					// actions={[
+					// 	(rowData) => ({
+					// 		icon: "info",
+					// 		tooltip: "More Info",
+					// 		onClick: (event, rowData) =>
+					// 			// history.push({
+					// 			//   pathname: "/sites",
+					// 			//   state: {
+					// 			//     // location state
+					// 			//     id: rowData.event_id,
+					// 			//   },
+					// 			// }),
+					// 			setShowModel({ show: true, data: rowData }),
+					// 	}),
+					// ]}
+					style={{ width: "100%" }}
+					// editable={{
+					//   onRowUpdate: (newData, oldData) =>
+					//     new Promise((resolve, reject) => {
+					//       //Backend call
+					//       fetch(url + "/" + oldData.id, {
+					//         method: "PUT",
+					//         headers: {
+					//           "Content-type": "application/json",
+					//         },
+					//         body: JSON.stringify(newData),
+					//       })
+					//         .then((resp) => resp.json())
+					//         .then((resp) => {
+					//           // getStudents();
+					//           resolve();
+					//         });
+					//     }),
+					// }}
+					// actions={[
+					//   (rowData) => ({
+					//     icon: "info",
+					//     tooltip: "More Info",
+					//     onClick: (event, rowData) =>
+					//       history.push({
+					//         pathname: "/sites",
+					//         state: {
+					//           // location state
+					//           id: rowData.event_id,
+					//           startDate : moment(startDate).format("YYYY-MM-DD"),
+					//           endDate : moment(endDate).format("YYYY-MM-DD"),
+					//         },
+					//       }),
+					//   }),
+					// ]}
+				/>
+			</MuiThemeProvider>
+			{/* <Modal
+				show={showModel.show}
+				onCancel={() => setShowModel({ show: false, data: null })}
+				header={showModel.data && showModel.data.warehouse_name}
+				contentClass="place-item__modal-content"
+				footerClass="place-item__modal-actions"
+				footer={
+					<Button onClick={() => setShowModel({ show: false, data: null })}>
+						CLOSE
+					</Button>
+				}> */}
+			{/* <ReactPlayer url="https://drive.google.com/file/d/1Xkn3footoYMINwri2khF9vruu_7c10RW/view" /> */}
+			{/* <div className="modal-data">
+						<h4>City : </h4>
+						<p className="data-city">{showModel.data && showModel.data.city}</p>
+					</div>
+					<div className="modal-data">
+						<h4>Date : </h4>
+						<p> {showModel.data && showModel.data.date}</p>
+					</div>
+					<div className="modal-data">
+						<h4>Time :</h4>
+						<p>{showModel.data && showModel.data.time}</p>
+					</div> */}
+			{/* <Magnifier
+						src={showModel.data && showModel.data.image}
+						height={300}
+						mgShape="square"
+					/> */}
+			{/* <img
+            className="modal-image"
+            src={showModel.data && showModel.data.image}
+            alt="fimage"
+          /> */}
+			{/* </Modal> */}
+		</div>
+	);
+}
+
+export default Diagnostics;

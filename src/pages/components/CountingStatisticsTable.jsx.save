@@ -1,0 +1,223 @@
+import * as React from "react";
+import { DataGrid } from "@mui/x-data-grid";
+import MaterialTable from "material-table";
+import { Button, createTheme, MuiThemeProvider } from "@material-ui/core";
+import moment from "moment";
+import axios from "axios";
+import { AuthContext } from "../Auth/auth-context";
+import Modal from "./Modal";
+import Magnifier from "react-magnifier";
+import SlideshowIcon from "@mui/icons-material/Slideshow";
+import ReactPlayer from "react-player";
+
+const theme = createTheme({
+	overrides: {
+		MuiTableSortLabel: {
+			root: {
+				color: "#fff",
+				transition: "all 0.5s ease",
+				"&:hover": {
+					color: "#66b933",
+				},
+			},
+		},
+	},
+});
+
+export default function CountingStatisticsTable(props) {
+	const auth = React.useContext(AuthContext);
+	const [countingStatsData, setData] = React.useState([]);
+	const [showModel, setShowModel] = React.useState({ show: false, data: null });
+	React.useEffect(() => {
+		let unmounted = false;
+		let url = props.state
+			? auth.user.isAdmin
+				? auth.warehouseId
+					? `${process.env.REACT_APP_USERS_BACKEND_URL}api/users/get_counting_data?warehouse_id=${auth.warehouseId}&start_date=${props.state.startDate}&end_date=${props.state.endDate}&id=${props.state.id}`
+					: `${process.env.REACT_APP_USERS_BACKEND_URL}api/users/get_counting_data?start_date=${props.state.startDate}&end_date=${props.state.endDate}&id=${props.state.id}`
+				: auth.warehouseId &&
+				  `${process.env.REACT_APP_USERS_BACKEND_URL}api/users/get_counting_data?warehouse_id=${auth.warehouseId}&start_date=${props.state.startDate}&end_date=${props.state.endDate}&id=${props.state.id}`
+			: auth.user.isAdmin
+			? auth.warehouseId
+				? `${
+						process.env.REACT_APP_USERS_BACKEND_URL
+				  }api/users/get_counting_data?warehouse_id=${
+						auth.warehouseId
+				  }&start_date=${moment(auth.startDate).format(
+						"YYYY-MM-DD",
+				  )}&end_date=${moment(auth.endDate).format("YYYY-MM-DD")}`
+				: `${
+						process.env.REACT_APP_USERS_BACKEND_URL
+				  }api/users/get_counting_data?start_date=${moment(
+						auth.startDate,
+				  ).format("YYYY-MM-DD")}&end_date=${moment(auth.endDate).format(
+						"YYYY-MM-DD",
+				  )}`
+			: auth.warehouseId &&
+			  `${
+					process.env.REACT_APP_USERS_BACKEND_URL
+			  }api/users/get_counting_data?warehouse_id=${
+					auth.warehouseId
+			  }&start_date=${moment(auth.startDate).format(
+					"YYYY-MM-DD",
+			  )}&end_date=${moment(auth.endDate).format("YYYY-MM-DD")}`;
+		const getShutterData = async () => {
+			try {
+				const responseData = await axios.get(url, {
+					headers: { token: "Bearer " + auth.token },
+				});
+				if (!unmounted) {
+					// console.log(url);
+					setData(responseData.data);
+					console.log(responseData.data);
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		if (url) {
+			getShutterData();
+		}
+
+		return () => {
+			unmounted = true;
+		};
+	}, [auth.endDate, auth.startDate, auth.token, auth.warehouseId, props.state]);
+
+	return (
+		<div>
+			<MuiThemeProvider theme={theme}>
+				<MaterialTable
+					title="Counting Statistics"
+					columns={[
+						{
+							field: "date",
+							title: "Date",
+						},
+						{
+							field: "camera_name",
+							title: "Camera Name",
+						},
+						{
+							field: "warehouse_name",
+							title: "Warehouse Name",
+						},
+						{
+							field: "truck_number_editable",
+							title: "Truck Number",
+						},
+						{
+							field: "bag_outward",
+							title: "Bag Count Unloading",
+						},
+						{
+							field: "bag_inward",
+							title: "Bag Count Loading",
+						},
+						{
+							field: "aggregate",
+							title: "Aggregate Bags",
+						},
+					]}
+					data={countingStatsData}
+					options={{
+						actionsColumnIndex: -1,
+						addRowPosition: "first",
+						headerStyle: {
+							backgroundColor: "rgb(40,40,40,0.8)",
+							color: "#FFF",
+						},
+					}}
+					actions={[
+						(rowData) => ({
+							icon: "info",
+							tooltip: "More Info",
+							onClick: (event, rowData) =>
+								// history.push({
+								//   pathname: "/sites",
+								//   state: {
+								//     // location state
+								//     id: rowData.event_id,
+								//   },
+								// }),
+								setShowModel({ show: true, data: rowData }),
+						}),
+					]}
+					style={{ width: "100%" }}
+					// editable={{
+					//   onRowUpdate: (newData, oldData) =>
+					//     new Promise((resolve, reject) => {
+					//       //Backend call
+					//       fetch(url + "/" + oldData.id, {
+					//         method: "PUT",
+					//         headers: {
+					//           "Content-type": "application/json",
+					//         },
+					//         body: JSON.stringify(newData),
+					//       })
+					//         .then((resp) => resp.json())
+					//         .then((resp) => {
+					//           // getStudents();
+					//           resolve();
+					//         });
+					//     }),
+					// }}
+					// actions={[
+					//   (rowData) => ({
+					//     icon: "info",
+					//     tooltip: "More Info",
+					//     onClick: (event, rowData) =>
+					//       history.push({
+					//         pathname: "/sites",
+					//         state: {
+					//           // location state
+					//           id: rowData.event_id,
+					//           startDate : moment(startDate).format("YYYY-MM-DD"),
+					//           endDate : moment(endDate).format("YYYY-MM-DD"),
+					//         },
+					//       }),
+					//   }),
+					// ]}
+				/>
+			</MuiThemeProvider>
+			<Modal
+                                sx={{style:}}
+				show={showModel.show}
+				onCancel={() => setShowModel({ show: false, data: null })}
+				header={showModel.data && showModel.data.warehouse_name}
+				contentClass="place-item__modal-content"
+				footerClass="place-item__modal-actions"
+				footer={
+					<Button onClick={() => setShowModel({ show: false, data: null })}>
+						CLOSE
+					</Button>
+				}>
+                               <div>
+				<ReactPlayer url={showModel.data && showModel.data.video_link} />
+                                </div>
+				{/* <div className="modal-data">
+						<h4>City : </h4>
+						<p className="data-city">{showModel.data && showModel.data.city}</p>
+					</div>
+					<div className="modal-data">
+						<h4>Date : </h4>
+						<p> {showModel.data && showModel.data.date}</p>
+					</div>
+					<div className="modal-data">
+						<h4>Time :</h4>
+						<p>{showModel.data && showModel.data.time}</p>
+					</div> */}
+				{/* <Magnifier
+						src={showModel.data && showModel.data.image}
+						height={300}
+						mgShape="square"
+					/> */}
+				{/* <img
+            className="modal-image"
+            src={showModel.data && showModel.data.image}
+            alt="fimage"
+          /> */}
+			</Modal>
+		</div>
+	);
+}

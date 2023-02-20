@@ -1,0 +1,14 @@
+.css-1ujnqem-MuiTabs-root{
+  background-color: lightgreen;
+  color: black;
+  display: flex;
+}
+
+ .css-ahj2mt-MuiTypography-root{
+  display: flex;
+  gap:1%;
+  justify-content:space-evenly;
+  flex-wrap: wrap;
+  width:'30%'
+  
+}

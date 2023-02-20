@@ -1,0 +1,12 @@
+version: "2"
+
+services:
+  frontend:
+    container_name: "boilerplate"
+    build: .
+    environment:
+      env_file: .env
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/usr/src/app
